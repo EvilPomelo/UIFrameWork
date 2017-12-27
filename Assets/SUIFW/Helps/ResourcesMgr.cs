@@ -18,7 +18,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 
-namespace SUIFW
+namespace UIFrameWork
 {
     public class ResourcesMgr : MonoBehaviour
     {

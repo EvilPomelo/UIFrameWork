@@ -7,7 +7,7 @@ public class StartGame : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        UIManager.GetInstance();
+        UIManager.GetInstance().ShowUIForms("LoginUIForm");
 	}
 	
 	// Update is called once per frame

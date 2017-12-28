@@ -25,9 +25,9 @@ namespace UIFrameWork
         //普通窗体
         Normal,
         //固定窗体
-        Fixed,
+        ReverseChange,
         //弹出窗体
-        PopUp,
+        HideOther
     }
 
     /// <summary>

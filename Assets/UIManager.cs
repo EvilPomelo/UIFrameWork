@@ -367,10 +367,15 @@ namespace UIFrameWork
             BaseUIForm baseUIForm;
             //参数检查
             if (string.IsNullOrEmpty(strUIName)) return;
+            //当前缓存中获取该UIForm的值
             _DicCurrentShowUIForms.TryGetValue(strUIName, out baseUIForm);
+            //如果当前缓存中没有该UIForm则返回
             if (baseUIForm == null) return;
+            //隐藏该UIForm
             baseUIForm.Hiding();
+            //从当前缓存中删除该strUIName
             _DicCurrentShowUIForms.Remove(strUIName);
+            //遍历缓存栈和当前缓存字典，全部重新显示
             foreach (BaseUIForm baseUI in _DicCurrentShowUIForms.Values)
             {
                 baseUI.Redisplay();

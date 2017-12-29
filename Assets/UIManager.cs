@@ -58,16 +58,17 @@ namespace UIFrameWork
             _StaCurrentUIForms = new Stack<BaseUIForm>();
             _TraCanvasTransform = GameObject.FindGameObjectWithTag(SysDefine.SYS_TAG_CANVAS).transform;
             //得到UI根节点、全屏节点、固定节点、弹出节点
-            _TraNormal = _TraCanvasTransform.Find("Normal");
-            _TraFixed = _TraCanvasTransform.Find("Fixed");
-            _TraPopUp = _TraCanvasTransform.Find("_TraPopUp");
-            _TraUIScripts = _TraCanvasTransform.Find("_ScriptMgr");
+            _TraNormal = _TraCanvasTransform.Find(SysDefine.SYS_Node_Normal);
+            _TraFixed = _TraCanvasTransform.Find(SysDefine.SYS_Node_Fixed);
+            _TraPopUp = _TraCanvasTransform.Find(SysDefine.SYS_Node_PopUp);
+            _TraUIScripts = _TraCanvasTransform.Find(SysDefine.SYS_Node_ScriptMgr);
             //将该对象加入__TraUIScripts节点下
-            transform.SetParent(_TraUIScripts);
+            UnityHelper.AddChildNodeParentNode(_TraUIScripts, transform);
             DontDestroyOnLoad(_TraCanvasTransform);
             if (_DicFormPaths != null)
             {
                 _DicFormPaths.Add("LoginUIForm", @"UIPrefabs\LoginUIForm");
+                _DicFormPaths.Add("SelectHeroUIForm", @"UIPrefabs\SelectHeroUIForm");
             }
         }
 
@@ -79,6 +80,7 @@ namespace UIFrameWork
             ResourcesMgr.GetInstance().LoadAsset(SysDefine.SYS_PATH_CANVAS, false);
         }
 
+        #region 打开与关闭窗体的管理类，上层所调用的方法
         /// <summary>
         /// 通过uiFormName读取UIForms，并确定显示模式
         /// </summary>
@@ -96,17 +98,16 @@ namespace UIFrameWork
             if (baseUIForms == null) return;
 
             //是否清空"栈集合"中得数据
-            bool boolClearResult = ClearStackArray();
-            if (!boolClearResult)
+            if (baseUIForms.CurrentUIType.IsClearStack)
             {
-                Debug.Log("栈中数据没有清空！");
+                ClearStackArray();
             }
 
             //根据不同的UI窗体的显示模式，分别作不同的加载处理
             switch (baseUIForms.CurrentUIType.UIForms_ShowMode)
             {
                 case UIFormShowMode.Normal:
-                    LoadUIToCurrentCache(uiFormName);
+                    EnterUIToCurrentCache(uiFormName);
                     break;
                 case UIFormShowMode.ReverseChange:
                     PushUIFormToStack(uiFormName);
@@ -147,9 +148,9 @@ namespace UIFrameWork
                     break;
             }
         }
+        #endregion
 
-
-
+        #region 获取窗体对象的方法
         /// <summary>
         /// 根据UI窗体的缓存集合判断是从缓存中取得还是从路径中读取uiFormName预制体
         /// </summary>
@@ -221,14 +222,14 @@ namespace UIFrameWork
             }
             return baseUiForm;
         }
+        #endregion
 
-
-
+        #region 打开与关闭窗体
         /// <summary>
-        /// 加载当前窗体到当前集合中
+        /// 进入当前窗体并加载到当前集合中
         /// </summary>
         /// <param name="uiFormName"></param>
-        void LoadUIToCurrentCache(string strUIName)
+        void EnterUIToCurrentCache(string strUIName)
         {
             BaseUIForm baseUIForm = null;
             //如果"正在显示"的集合中，存在整个UI窗体，则直接返回
@@ -238,11 +239,10 @@ namespace UIFrameWork
             _DicALLUIForms.TryGetValue(strUIName, out baseUIForm);
             if (baseUIForm != null)
             {
-                _DicCurrentShowUIForms.Add(strUIName,baseUIForm);
+                _DicCurrentShowUIForms.Add(strUIName, baseUIForm);
                 baseUIForm.Display();
             }
         }
-
 
         /// <summary>
         /// 退出指定UI窗体
@@ -251,8 +251,8 @@ namespace UIFrameWork
         void ExitUIForms(string strUIName)
         {
             BaseUIForm baseUIForm = null;
-            _DicCurrentShowUIForms.TryGetValue(strUIName,out baseUIForm);
-            if (baseUIForm != null) return;
+            _DicCurrentShowUIForms.TryGetValue(strUIName, out baseUIForm);
+            if (baseUIForm == null) return;
             baseUIForm.Hiding();
             _DicCurrentShowUIForms.Remove(strUIName);
         }
@@ -264,7 +264,7 @@ namespace UIFrameWork
         void PushUIFormToStack(string strUIName)
         {
             BaseUIForm baseUIForm = null;
-            if (_StaCurrentUIForms.Count>0)
+            if (_StaCurrentUIForms.Count > 0)
             {
                 BaseUIForm TopUIForm = _StaCurrentUIForms.Peek();
                 //冻结栈顶元素
@@ -282,7 +282,7 @@ namespace UIFrameWork
                 baseUIForm.Display();
                 //该窗体入栈操作
                 _StaCurrentUIForms.Push(baseUIForm);
-            }            
+            }
         }
 
         /// <summary>
@@ -290,18 +290,18 @@ namespace UIFrameWork
         /// </summary>
         void PopUIFroms(string strUIName)
         {
-            if (_StaCurrentUIForms.Count>=2)
+            if (_StaCurrentUIForms.Count >= 2)
             {
                 //出栈处理
-                BaseUIForm topUIForm=_StaCurrentUIForms.Pop();
+                BaseUIForm topUIForm = _StaCurrentUIForms.Pop();
                 //隐藏该出栈对象
                 topUIForm.Hiding();
                 //获取出栈后的栈顶对象
-                BaseUIForm nextUIForm=_StaCurrentUIForms.Peek();
+                BaseUIForm nextUIForm = _StaCurrentUIForms.Peek();
                 //被覆盖的上一个窗体重新显示
                 nextUIForm.Redisplay();
             }
-            if (_StaCurrentUIForms.Count==1)
+            if (_StaCurrentUIForms.Count == 1)
             {
                 //出栈处理
                 BaseUIForm topUIForms = _StaCurrentUIForms.Pop();
@@ -335,7 +335,7 @@ namespace UIFrameWork
 
             if (string.IsNullOrEmpty(strUIName)) return;
             //当前窗体集合中获取该界面
-            _DicCurrentShowUIForms.TryGetValue(strUIName,out baseUIForm);
+            _DicCurrentShowUIForms.TryGetValue(strUIName, out baseUIForm);
             //若该界面为空
             if (baseUIForm != null) return;
             //把“正在显示集合”与“栈集合”中所有窗体隐藏
@@ -348,10 +348,10 @@ namespace UIFrameWork
                 baseUI.Hiding();
             }
             //把当前窗体加入到"正在显示的窗体"集合中，且做显示处理。
-            _DicALLUIForms.TryGetValue(strUIName,out baseUIFormAll);
-            if (baseUIFormAll!=null)
+            _DicALLUIForms.TryGetValue(strUIName, out baseUIFormAll);
+            if (baseUIFormAll != null)
             {
-                _DicCurrentShowUIForms.Add(strUIName,baseUIFormAll);
+                _DicCurrentShowUIForms.Add(strUIName, baseUIFormAll);
                 //窗体显示
                 baseUIFormAll.Display();
             }
@@ -385,5 +385,58 @@ namespace UIFrameWork
                 baseUI.Redisplay();
             }
         }
+        #endregion
+
+        #region  显示“UI管理器”内部核心数据，测试使用
+
+        /// <summary>
+        /// 显示"所有UI窗体"集合的数量
+        /// </summary>
+        /// <returns></returns>
+        public int ShowALLUIFormCount()
+        {
+            if (_DicALLUIForms != null)
+            {
+                return _DicALLUIForms.Count;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// 显示"当前窗体"集合中数量
+        /// </summary>
+        /// <returns></returns>
+        public int ShowCurrentUIFormsCount()
+        {
+            if (_DicCurrentShowUIForms != null)
+            {
+                return _DicCurrentShowUIForms.Count;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// 显示“当前栈”集合中窗体数量
+        /// </summary>
+        /// <returns></returns>
+        public int ShowCurrentStackUIFormsCount()
+        {
+            if (_StaCurrentUIForms != null)
+            {
+                return _StaCurrentUIForms.Count;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        #endregion
     }
 }

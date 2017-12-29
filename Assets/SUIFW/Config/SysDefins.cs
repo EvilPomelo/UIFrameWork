@@ -52,6 +52,11 @@ namespace UIFrameWork
         public const string SYS_PATH_CANVAS = @"UIPrefabs\Canvas";
         /* 标签常量 */
         public const string SYS_TAG_CANVAS = "_TagCanvas";
+        /*节点常量*/
+        public const string SYS_Node_Normal = "_Normal";
+        public const string SYS_Node_Fixed = "_Fixed";
+        public const string SYS_Node_PopUp= "_PopUp";
+        public const string SYS_Node_ScriptMgr = "_ScriptMgr";
 
         /* 全局性的方法 */
         //Todo...

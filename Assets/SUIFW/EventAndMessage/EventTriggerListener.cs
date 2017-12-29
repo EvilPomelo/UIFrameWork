@@ -13,7 +13,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace SUIFW
+namespace UIFrameWork
 {
     public class EventTriggerListener :UnityEngine.EventSystems.EventTrigger 
     {

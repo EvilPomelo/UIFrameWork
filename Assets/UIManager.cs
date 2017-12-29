@@ -63,7 +63,7 @@ namespace UIFrameWork
             _TraPopUp = _TraCanvasTransform.Find(SysDefine.SYS_Node_PopUp);
             _TraUIScripts = _TraCanvasTransform.Find(SysDefine.SYS_Node_ScriptMgr);
             //将该对象加入__TraUIScripts节点下
-            UnityHelper.AddChildNodeParentNode(_TraUIScripts, transform);
+            UnityHelper.AddChildNodeToParentNode(_TraUIScripts, transform);
             DontDestroyOnLoad(_TraCanvasTransform);
             if (_DicFormPaths != null)
             {

@@ -83,7 +83,7 @@ namespace UIFrameWork
         /// </summary>
         /// <param name="parents">父对象的方法</param>
         /// <param name="child">子对象的方法</param>
-        public static void AddChildNodeParentNode(Transform parents, Transform child)
+        public static void AddChildNodeToParentNode(Transform parents, Transform child)
         {
             child.SetParent(parents, false);
             child.localPosition = Vector3.zero;
